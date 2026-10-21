@@ -8,10 +8,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
-# 3. Локальные папки отчетов Allure
-allure-results/
-allure-report/
-
-# 4. Специфические настройки сред разработки (если вы работаете в PyCharm или VS Code)
+# 3. Специфические настройки сред разработки (если вы работаете в PyCharm или VS Code)
 .idea/
 .vscode/
