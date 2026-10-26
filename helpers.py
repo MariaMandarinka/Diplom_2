@@ -1,5 +1,20 @@
 import requests
 from data import URL, Endpoints
+from faker import Faker
+
+fake = Faker()
+
+class UserGenerator:
+    """Класс для генерации тестовых данных пользователей"""
+    
+    @staticmethod
+    def generate_user_data():
+        """Генерирует словарь с валидными случайными данными пользователя"""
+        return {
+            "email": fake.email(),
+            "password": fake.password(length=10),
+            "name": fake.first_name()
+        }
 
 class StellarBurgersAPI:
     """Хелпер для работы с пользователем и авторизацией"""

@@ -8,7 +8,7 @@ class TestUserRegistration:
     
     @allure.story("Регистрация")
     @allure.title("Создать уникального пользователя")
-    def test_register_unique_user_success(self, unique_user_data):
+    def test_register_unique_user_success(self, unique_user_data, register_and_cleanup_user):
         with allure.step("Отправка запроса на регистрацию с уникальными данными"):
             response = StellarBurgersAPI.register_user(unique_user_data)
         
@@ -16,10 +16,9 @@ class TestUserRegistration:
             assert response.status_code == StatusCode.OK
             assert response.json()["success"] is True
             assert "accessToken" in response.json()
-        
-        with allure.step("Очистка: удаление созданного пользователя"):
-            token = response.json()["accessToken"]
-            StellarBurgersAPI.delete_user(token)
+            
+        # Записываем токен в фикстуру для автоматического удаления
+        register_and_cleanup_user["accessToken"] = response.json().get("accessToken")
 
     @allure.story("Регистрация")
     @allure.title("Создать пользователя, который уже зарегистрирован")

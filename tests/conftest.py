@@ -1,17 +1,24 @@
 import pytest
-from faker import Faker
-from helpers import StellarBurgersAPI
-
-fake = Faker()
+from helpers import StellarBurgersAPI, UserGenerator, StellarBurgersOrderAPI
 
 @pytest.fixture
 def unique_user_data():
-    """Генерация случайных валидных данных пользователя"""
-    return {
-        "email": fake.email(),
-        "password": fake.password(length=10),
-        "name": fake.first_name()
-    }
+    """Фикстура вызывает метод генерации данных из модуля helpers"""
+    return UserGenerator.generate_user_data()
+
+# НОВАЯ ФИКСТУРА ДЛЯ ТЕСТА УСПЕШНОЙ РЕГИСТРАЦИИ:
+@pytest.fixture
+def register_and_cleanup_user(unique_user_data):
+    """Фикстура хранит токен создаваемого в тесте пользователя 
+    и гарантированно удаляет его после окончания теста"""
+    user_tokens = {}
+    
+    yield user_tokens  # Передаем пустой словарь в тест, тест заполнит его токеном
+    
+    # Блок очистки — выполнится в любом случае!
+    token = user_tokens.get("accessToken")
+    if token:
+        StellarBurgersAPI.delete_user(token)
 
 @pytest.fixture
 def registered_user(unique_user_data):
@@ -23,3 +30,10 @@ def registered_user(unique_user_data):
     
     if token:
         StellarBurgersAPI.delete_user(token)
+        # ДОБАВЛЯЕМ СЮДА ЭТУ ФИКСТУРУ ИЗ ТЕСТОВ ЗАКАЗА:
+@pytest.fixture
+def get_valid_ingredients():
+    """Предусловие: Динамическое получение актуальных ID ингредиентов перед тестом"""
+    resp = StellarBurgersOrderAPI.get_ingredients()
+    # Возвращаем список из первых двух ID ингредиентов
+    return [ing["_id"] for ing in resp.json()["data"][:2]]

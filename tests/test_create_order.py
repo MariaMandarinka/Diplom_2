@@ -6,20 +6,14 @@ from data import StatusCode, TestData
 @allure.feature("Создание заказа")
 class TestOrderCreation:
 
-    @pytest.fixture(autouse=True)
-    def get_valid_ingredients(self):
-        """Предусловие: Динамическое получение актуальных ID ингредиентов перед каждым тестом"""
-        with allure.step("Запрос списка доступных ингредиентов у API"):
-            resp = StellarBurgersOrderAPI.get_ingredients()
-            self.valid_ids = [ing["_id"] for ing in resp.json()["data"][:2]]
-
     @allure.story("Создание бургера")
     @allure.title("Создание заказа с авторизацией")
-    def test_create_order_authorized_success(self, registered_user):
+    def test_create_order_authorized_success(self, registered_user, get_valid_ingredients):
         _, token = registered_user
         
         with allure.step("Отправка запроса на заказ с токеном авторизации"):
-            response = StellarBurgersOrderAPI.create_order(self.valid_ids, token=token)
+            # ЗАМЕНИЛИ self.valid_ids на get_valid_ingredients
+            response = StellarBurgersOrderAPI.create_order(get_valid_ingredients, token=token)
         
         with allure.step("Проверка успешного создания заказа для пользователя"):
             assert response.status_code == StatusCode.OK
@@ -28,9 +22,10 @@ class TestOrderCreation:
 
     @allure.story("Создание бургера")
     @allure.title("Создание заказа без авторизации")
-    def test_create_order_unauthorized_success(self):
+    def test_create_order_unauthorized_success(self, get_valid_ingredients):
         with allure.step("Отправка запроса на заказ без токена"):
-            response = StellarBurgersOrderAPI.create_order(self.valid_ids, token=None)
+            # ЗАМЕНИЛИ self.valid_ids на get_valid_ingredients
+            response = StellarBurgersOrderAPI.create_order(get_valid_ingredients, token=None)
         
         with allure.step("Проверка, что неавторизованный заказ успешно создается"):
             assert response.status_code == StatusCode.OK
@@ -39,11 +34,12 @@ class TestOrderCreation:
 
     @allure.story("Создание бургера")
     @allure.title("Создание заказа с ингредиентами")
-    def test_create_order_with_ingredients_success(self, registered_user):
+    def test_create_order_with_ingredients_success(self, registered_user, get_valid_ingredients):
         _, token = registered_user
         
         with allure.step("Проверка успешной отправки заполненного массива ингредиентов"):
-            response = StellarBurgersOrderAPI.create_order(self.valid_ids, token=token)
+            # ЗАМЕНИЛИ self.valid_ids на get_valid_ingredients
+            response = StellarBurgersOrderAPI.create_order(get_valid_ingredients, token=token)
         
         assert response.status_code == StatusCode.OK
         assert response.json()["success"] is True
